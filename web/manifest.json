@@ -1,0 +1,17 @@
+{
+  "name": "Photo Roulette Birthday",
+  "short_name": "Photo Roulette",
+  "description": "Balance tes photos de la soirée, elles passent en direct sur l'écran !",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0014",
+  "theme_color": "#0a0014",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

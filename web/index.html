@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0a0014" />
+  <title>📸 Photo Roulette</title>
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="apple-touch-icon" href="/static/icon.svg" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <img id="hero" class="hero" src="/static/hero.png" alt="" onerror="this.style.display='none'" />
+    <h1>Balance ta<br>photo 🎉</h1>
+    <p class="subtitle">Immortalise la soirée 🥳<br>ça s'affiche en direct sur l'écran !</p>
+
+    <input class="name-field" id="author" type="text" maxlength="40" placeholder="Ton p'tit nom (optionnel)" />
+
+    <label class="shoot">
+      <span id="btnLabel">📷 PRENDRE UNE PHOTO</span>
+      <input id="file" type="file" accept="image/*" capture="environment" />
+    </label>
+
+    <div class="status" id="status"></div>
+    <div class="count-badge" id="count"></div>
+    <div class="gallery" id="gallery"></div>
+
+    <p class="footer-link">Écran de diffusion : <a href="/display">/display</a></p>
+  </div>
+
+  <script src="/static/capture.js"></script>
+</body>
+</html>

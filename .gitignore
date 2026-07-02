@@ -1,0 +1,23 @@
+# Environnement Python
+.venv/
+__pycache__/
+*.pyc
+
+# Binaires téléchargés (cloudflared) + sorties runtime
+bin/
+
+# Photos de la soirée (on ne versionne pas les photos)
+uploads/*
+!uploads/.gitkeep
+
+# Photo d'accueil fournie (perso -> JAMAIS sur un repo public)
+web/hero.jpg
+web/hero.jpeg
+web/hero.png
+/accueil.png
+/accueil.jpg
+/accueil.jpeg
+
+# OS
+Thumbs.db
+.DS_Store
