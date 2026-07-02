@@ -1,6 +1,6 @@
 // Service worker : met en cache la "coquille" de l'app pour qu'elle
 // s'ouvre même hors-ligne. Les photos et l'API ne sont jamais mises en cache.
-const CACHE = "photo-roulette-v1";
+const CACHE = "photo-roulette-v2";
 const SHELL = [
   "/",
   "/static/styles.css",

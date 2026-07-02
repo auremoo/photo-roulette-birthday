@@ -21,7 +21,7 @@ $log = "$root\bin\tunnel.log"
 if (Test-Path $log) { Remove-Item $log -Force }
 Write-Host "Ouverture du tunnel public…" -ForegroundColor Cyan
 $tunnel = Start-Process $cf `
-  -ArgumentList "tunnel","--url","http://localhost:8000","--no-autoupdate" `
+  -ArgumentList "tunnel","--url","http://127.0.0.1:8000","--no-autoupdate" `
   -PassThru -WindowStyle Minimized -RedirectStandardError $log -RedirectStandardOutput "$root\bin\tunnel.out"
 
 # 3) On attend l'URL https://xxxx.trycloudflare.com

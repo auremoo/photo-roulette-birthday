@@ -89,21 +89,42 @@ async function drainQueue() {
       return;
     }
     setStatus(`<span class="spinner"></span> Envoi… (${items.length} en attente)`, "");
+    let skipped = 0;
+    let remaining = items.length;
     for (const item of items) {
       const form = new FormData();
       form.append("file", item.blob, "photo.jpg");
       form.append("author", item.author || "");
+
+      let res;
       try {
-        const res = await fetch("/api/upload", { method: "POST", body: form });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        await queueDelete(item.id);
+        res = await fetch("/api/upload", { method: "POST", body: form });
       } catch (e) {
-        // connexion coupée : on garde tout, on retentera plus tard
-        setStatus(`📴 Pas de réseau — ${items.length} photo(s) en attente, envoi auto au retour du wifi`, "err");
+        // vraie coupure réseau : on garde tout, on réessaiera automatiquement
+        setStatus(`📴 Pas de réseau — ${remaining} photo(s) en attente, envoi auto au retour du wifi`, "err");
+        return;
+      }
+
+      if (res.ok) {
+        await queueDelete(item.id);
+        remaining--;
+      } else if (res.status >= 400 && res.status < 500) {
+        // image refusée par le serveur (format illisible) : inutile d'insister,
+        // sinon elle bloquerait toutes les suivantes dans la file.
+        await queueDelete(item.id);
+        remaining--;
+        skipped++;
+      } else {
+        // erreur serveur/tunnel temporaire (5xx) : on réessaiera plus tard
+        setStatus(`⚠️ Serveur momentanément indisponible — nouvel essai auto…`, "err");
         return;
       }
     }
-    setStatus("✅ Envoyées ! Ça passe à l'écran 🎬", "ok");
+    if (skipped > 0) {
+      setStatus(`⚠️ ${skipped} photo(s) au format non supporté ignorée(s). Le reste est envoyé ✅`, "err");
+    } else {
+      setStatus("✅ Envoyées ! Ça passe à l'écran 🎬", "ok");
+    }
   } finally {
     draining = false;
     btnLabel.textContent = myCount ? "📷 ENCORE UNE !" : "📷 PRENDRE UNE PHOTO";
