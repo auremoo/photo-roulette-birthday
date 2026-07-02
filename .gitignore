@@ -10,10 +10,7 @@ bin/
 uploads/*
 !uploads/.gitkeep
 
-# Photo d'accueil fournie (perso -> JAMAIS sur un repo public)
-web/hero.jpg
-web/hero.jpeg
-web/hero.png
+# Copie source à la racine (on versionne plutôt web/hero.png)
 /accueil.png
 /accueil.jpg
 /accueil.jpeg
