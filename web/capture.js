@@ -92,13 +92,15 @@ async function drainQueue() {
     let skipped = 0;
     let remaining = items.length;
     for (const item of items) {
-      const form = new FormData();
-      form.append("file", item.blob, "photo.jpg");
-      form.append("author", item.author || "");
-
+      // envoi en binaire brut (pas de multipart) : le prénom passe dans l'URL.
+      const qs = "?author=" + encodeURIComponent(item.author || "");
       let res;
       try {
-        res = await fetch("/api/upload", { method: "POST", body: form });
+        res = await fetch("/api/upload" + qs, {
+          method: "POST",
+          headers: { "Content-Type": item.blob.type || "application/octet-stream" },
+          body: item.blob,
+        });
       } catch (e) {
         // vraie coupure réseau : on garde tout, on réessaiera automatiquement
         setStatus(`📴 Pas de réseau — ${remaining} photo(s) en attente, envoi auto au retour du wifi`, "err");

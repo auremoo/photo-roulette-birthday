@@ -1,6 +1,6 @@
 // Service worker : met en cache la "coquille" de l'app pour qu'elle
 // s'ouvre même hors-ligne. Les photos et l'API ne sont jamais mises en cache.
-const CACHE = "photo-roulette-v2";
+const CACHE = "photo-roulette-v3";
 const SHELL = [
   "/",
   "/static/styles.css",
@@ -26,8 +26,14 @@ self.addEventListener("fetch", (e) => {
   if (url.pathname.startsWith("/api") || url.pathname.startsWith("/uploads") || url.pathname === "/ws") {
     return;
   }
-  // coquille : cache d'abord, réseau ensuite
+  // coquille : RÉSEAU d'abord (toujours la dernière version), cache en secours hors-ligne
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });

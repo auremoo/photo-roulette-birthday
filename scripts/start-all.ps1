@@ -54,8 +54,10 @@ Write-Host " QR image (print) : $root\bin\qr.png"               -ForegroundColor
 Write-Host "===================================================" -ForegroundColor Green
 Write-Host " Pour tout arrêter : ferme cette fenêtre puis .\scripts\stop-all.ps1" -ForegroundColor DarkGray
 
-# 5) Ouvre l'écran de diffusion + le QR sur ce PC
-Start-Process "$publicUrl/display"
+# 5) Ouvre l'écran de diffusion EN LOCAL (sur ce PC, pas besoin du tunnel/DNS)
+#    + le QR. Le PC étant le serveur, l'écran s'ouvre via localhost : ça évite
+#    tout souci de DNS (certains réseaux d'entreprise bloquent trycloudflare.com).
+Start-Process "http://localhost:8000/display"
 Start-Process "$root\bin\qr.png"
 
 # garde les PID pour l'arrêt

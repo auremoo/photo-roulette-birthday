@@ -17,11 +17,14 @@ from __future__ import annotations
 import asyncio
 import io
 import json
+import logging
 import time
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, UploadFile, WebSocket, WebSocketDisconnect
+logger = logging.getLogger("uvicorn.error")
+
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
@@ -103,9 +106,19 @@ def list_photos_sorted() -> list[dict]:
 
 # --- API -------------------------------------------------------------------
 @app.post("/api/upload")
-async def upload(file: UploadFile = File(...), author: str = Form("")):
-    """Reçoit une photo, la normalise (orientation + resize + JPEG) et la stocke."""
-    raw = await file.read()
+async def upload(request: Request):
+    """Reçoit une photo en BINAIRE BRUT (corps de la requête) et la stocke.
+
+    On n'utilise volontairement PAS de multipart/form-data : Safari/WebKit produit
+    un multipart que la lib python-multipart lit parfois vide. Le corps de la
+    requête = les octets de l'image ; le prénom passe en paramètre d'URL (?author=).
+    """
+    raw = await request.body()
+    author = (request.query_params.get("author") or "").strip()[:40]
+    logger.info(
+        "UPLOAD recu: taille=%d octets author=%r content_type=%s",
+        len(raw), author, request.headers.get("content-type"),
+    )
     if not raw:
         return JSONResponse({"error": "fichier vide"}, status_code=400)
 
@@ -114,8 +127,9 @@ async def upload(file: UploadFile = File(...), author: str = Form("")):
         img = ImageOps.exif_transpose(img)          # corrige l'orientation du tel
         img = img.convert("RGB")
         img.thumbnail((MAX_SIDE, MAX_SIDE))          # réduit si trop grand
-    except Exception:
-        return JSONResponse({"error": "image illisible"}, status_code=400)
+    except Exception as e:
+        logger.exception("UPLOAD decode KO: name=%s type=%s err=%s", file.filename, file.content_type, e)
+        return JSONResponse({"error": f"image illisible: {e}"}, status_code=400)
 
     ts = int(time.time() * 1000)
     stem = f"{ts}-{uuid.uuid4().hex[:8]}"
