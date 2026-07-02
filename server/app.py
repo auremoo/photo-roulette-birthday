@@ -26,6 +26,15 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 
+# Support des photos iPhone (HEIC/HEIF) : sans ça, Pillow ne sait pas les
+# décoder et l'upload renvoie « image illisible ».
+try:
+    from pillow_heif import register_heif_opener
+
+    register_heif_opener()
+except Exception:
+    pass  # si l'extension manque, on reste sur jpeg/png/webp
+
 # --- Chemins ---------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 WEB_DIR = BASE_DIR / "web"
