@@ -12,55 +12,62 @@ aléatoire** sur un écran (vidéoprojecteur / autre PC). Ton PC sert de serveur
 
 ---
 
-## 🚀 Démarrage rapide (3 étapes)
+## 🚀 Démarrage en 1 clic
 
-> Prérequis : **Python 3.11+** et **Git** (déjà installés chez toi ✅).
-> Ouvre un terminal **PowerShell** dans le dossier du projet.
+> Prérequis : **Python 3.11+** et **Git** (déjà installés). Tout se fait en
+> **double-cliquant** sur les fichiers `.bat` à la racine — aucun terminal à ouvrir.
 
-### 1. Installation (à faire UNE fois, la veille avec du bon wifi)
-```powershell
-.\scripts\setup.ps1
-```
-Ça crée l'environnement Python, installe les dépendances et télécharge `cloudflared`.
+### Étape 1 — Installation (UNE seule fois, la veille avec du bon wifi)
+Double-clique sur **`1 - INSTALLER (une seule fois).bat`**
+→ crée l'environnement Python, installe les dépendances et télécharge `cloudflared`.
 
-### 2. (Optionnel) Dépose la photo d'accueil
-Mets ta photo dans `web\hero.jpg` (ou `.png`) → elle s'affiche sur la page d'accueil.
-Si absente, la page marche quand même (photo simplement masquée).
+### Étape 2 — (optionnel) Photo d'accueil
+Une photo est déjà en place (`web\hero.png`). Pour la changer, remplace ce fichier
+par la tienne (garde le nom `hero.png`).
 
-### 3. Lancer la soirée 🎉
-```powershell
-.\scripts\start-all.ps1
-```
-Le script :
-- démarre le serveur,
-- ouvre un **tunnel public** et récupère l'URL `https://xxxx.trycloudflare.com`,
-- affiche un **QR code** (dans le terminal + image `bin\qr.png`),
-- ouvre l'**écran de diffusion** sur ce PC.
+### Étape 3 — Lancer la soirée 🎉
+Double-clique sur **`2 - LANCER LA SOIREE.bat`**. Ça fait **tout, automatiquement** :
 
-Puis :
-- 📱 **Invités** → scannent le QR (URL racine) → prennent des photos.
-- 🖥️ **Écran de diffusion** → ouvre `https://xxxx.trycloudflare.com/display` sur le PC/écran voulu.
+1. ✅ démarre le **serveur** sur ton PC,
+2. ✅ ouvre le **tunnel internet** et récupère l'URL publique `https://xxxx.trycloudflare.com`,
+3. ✅ affiche le **QR code** (dans la fenêtre + image `bin\qr.png` qui s'ouvre),
+4. ✅ ouvre l'**écran de diffusion** `/display` sur ton PC (en local).
 
-Pour tout arrêter :
-```powershell
-.\scripts\stop-all.ps1
-```
+Ensuite :
+- 📱 **Les invités** scannent le QR → prennent des photos → elles s'affichent en direct.
+- 🖥️ **L'écran de diffusion** est déjà ouvert sur ton PC (`http://localhost:8000/display`) ;
+  mets-le en **plein écran (F11)** sur le vidéoprojecteur / la TV.
+
+> ⏳ Attends **~15 secondes** après le lancement (le temps que le tunnel se raccroche)
+> avant de scanner/tester.
+
+### Arrêter
+Double-clique sur **`3 - ARRETER.bat`**.
+
+---
+
+## 🖥️ Important : l'écran de diffusion s'ouvre en **local** sur le PC serveur
+
+Sur **ton PC** (le serveur), ouvre toujours l'écran via **`http://localhost:8000/display`**
+(le lanceur le fait tout seul). N'utilise **pas** l'URL `trycloudflare.com` sur ce PC :
+certains réseaux d'entreprise ont un **DNS qui bloque `trycloudflare.com`** (erreur
+`ERR_NAME_NOT_RESOLVED`). Ça ne concerne que ton PC — les invités, eux, passent par
+l'URL publique depuis leur 4G/wifi sans problème.
 
 ---
 
 ## 🆘 Pas d'internet du tout ? Mode local (hotspot)
 
+Si le lieu n'a **aucun** accès internet :
+
 1. Sur ton PC : **Paramètres Windows → Réseau et Internet → Point d'accès sans fil mobile** → Activer.
    (ou branche-toi au wifi de la salle : tout le monde doit être sur le **même réseau**.)
-2. Lance :
-   ```powershell
-   .\scripts\start-local.ps1
-   ```
+2. Double-clique sur **`scripts\start-local.ps1`** (ou lance-le depuis PowerShell).
    Ça génère un QR vers l'IP locale du PC (ex. `http://192.168.1.20:8000`).
 3. Les invités se connectent au **même wifi/hotspot** puis scannent le QR.
 
-> En mode local, l'appareil photo s'ouvre via le sélecteur de fichiers du téléphone
-> (fonctionne en HTTP). Le tunnel (mode principal) fournit du HTTPS.
+> En mode local, la 4G ne permet plus d'accéder à l'app : les invités doivent être sur
+> le hotspot/wifi du PC. C'est pourquoi le mode tunnel (avec internet) reste le meilleur.
 
 ---
 
@@ -89,8 +96,8 @@ page est rouverte à portée du serveur, elles s'envoient.
 ```
 📱 Téléphones (capture) ─┐
                          ├─► 🌐 tunnel cloudflared ─► 💻 TON PC : FastAPI (uvicorn)
-🖥️  PC diffusion ─────────┘        (URL HTTPS)            ├─ sert le front (HTML/JS)
-                                                          ├─ POST /api/upload (Pillow: resize + orientation)
+🖥️  PC diffusion (localhost) ┘     (URL HTTPS)            ├─ sert le front (HTML/JS)
+                                                          ├─ POST /api/upload (binaire brut, Pillow: resize+orientation)
                                                           ├─ GET  /api/photos
                                                           └─ WS   /ws (temps réel)
                                                           photos stockées dans uploads/
@@ -109,6 +116,9 @@ specs fonctionnelles/techniques, architecture, API, réseau, sécurité, runbook
 
 ```
 photo-roulette-birthday/
+├── 1 - INSTALLER (une seule fois).bat   # 1 clic : installation
+├── 2 - LANCER LA SOIREE.bat             # 1 clic : démarre tout (serveur+tunnel+QR+display)
+├── 3 - ARRETER.bat                      # 1 clic : arrête tout
 ├── server/app.py          # backend FastAPI (API + WebSocket + sert le front)
 ├── web/
 │   ├── index.html         # page d'accueil / capture (téléphones)
@@ -118,9 +128,9 @@ photo-roulette-birthday/
 │   ├── display.js         # tirage aléatoire sans répétition + temps réel
 │   ├── display.css
 │   ├── manifest.json      # PWA
-│   ├── sw.js              # service worker (offline)
+│   ├── sw.js              # service worker (réseau d'abord, cache secours)
 │   ├── icon.svg
-│   └── hero.jpg           # (à déposer) photo d'accueil
+│   └── hero.png           # photo d'accueil
 ├── scripts/
 │   ├── setup.ps1          # install (venv + deps + cloudflared)
 │   ├── get-cloudflared.ps1

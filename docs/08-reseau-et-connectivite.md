@@ -58,6 +58,19 @@ Si **aucun** internet :
 | Hébergement cloud complet | ✅ | ✅ | ⚠️ | ❌ | ❌ (le serveur doit être le PC) |
 | GitHub Pages | ✅ (front only) | ✅ | ⚠️ | ❌ | ❌ (pas d'upload ni temps réel) |
 
+## 4bis. Écran de diffusion : toujours en local, et le piège du DNS d'entreprise
+
+L'écran de diffusion tourne sur le **PC serveur lui-même**. Il doit donc s'ouvrir via
+**`http://localhost:8000/display`** (direct, pas de tunnel, pas de DNS). Le lanceur le fait
+automatiquement.
+
+⚠️ **Piège observé** : sur un **PC d'entreprise**, le DNS interne peut **bloquer
+`trycloudflare.com`** → ouvrir l'URL publique sur ce PC donne `ERR_NAME_NOT_RESOLVED`.
+- Ça ne concerne **que ce PC** : les invités (4G / autre wifi) résolvent l'URL normalement.
+- Solution : sur le PC serveur, utiliser `localhost` pour l'écran (déjà le cas).
+- Pour la soirée, le PC ne sera généralement pas sur le réseau d'entreprise → aucun souci.
+  Si jamais le wifi du lieu filtrait aussi `trycloudflare.com`, les invités en 4G restent OK.
+
 ## 5. Matrice de pannes et de reprise
 
 | Panne | Effet | Reprise |

@@ -24,9 +24,12 @@ change sur <input>
 - Base `photo-roulette`, store `queue` (clé auto-incrémentée).
 - `queueAdd` / `queueAll` / `queueDelete` encapsulent les transactions.
 - `drainQueue()` :
-  - lit tous les éléments, les envoie en FIFO via `POST /api/upload` ;
-  - succès → `queueDelete(id)` ;
-  - échec (réseau) → **arrêt**, on conserve tout, message « en attente ».
+  - lit tous les éléments, les envoie en FIFO via `POST /api/upload?author=...` avec le
+    **blob en corps de requête** (binaire brut, pas de `FormData`/multipart — voir §3) ;
+  - succès (2xx) → `queueDelete(id)` ;
+  - erreur réseau (coupure) → **arrêt**, on conserve tout, message « en attente » ;
+  - erreur serveur 5xx → **arrêt**, on réessaiera plus tard ;
+  - refus 4xx (image invalide) → on retire l'élément (sinon il bloquerait la file).
 - **Déclencheurs de drain** : au chargement, sur évènement `online`, toutes les 8 s.
 - Garde-fou `draining` : empêche deux drains simultanés.
 
@@ -68,22 +71,33 @@ pickNext():
 ### Animations
 - Entrée `enter` (zoom + rotation), sortie `leave`, légende avec le prénom, fond néon animé.
 
-## 3. Service worker — `sw.js`
+## 3. Pourquoi un envoi binaire (et pas multipart) ?
+
+Historiquement l'upload utilisait `FormData` (`multipart/form-data`). Problème constaté en
+conditions réelles : **Safari/WebKit (iPhone)** produit un corps multipart que la lib
+serveur `python-multipart` lit **vide** (`form keys=[]`), d'où un **422** et une photo
+jamais enregistrée (message trompeur « format non supporté »). `curl` passait, mais pas le
+téléphone. Solution : envoyer **les octets bruts du blob** dans le corps, prénom en
+`?author=`. Simple, robuste, indépendant du navigateur.
+
+## 4. Service worker — `sw.js`
 
 - `install` : met en cache `SHELL` (`/`, CSS, `capture.js`, manifest) puis `skipWaiting`.
 - `activate` : purge les vieux caches, `clients.claim`.
 - `fetch` : **n'intercepte jamais** `/api`, `/uploads`, `/ws` (toujours réseau frais).
-  Le reste : *cache-first* avec repli réseau.
+  Le reste : **réseau d'abord**, mise en cache au passage, **repli sur le cache hors-ligne**.
 
-> Le SW ne met **pas** les photos en cache : le slideshow doit refléter l'état réel du
-> serveur, et on évite de saturer le stockage du navigateur.
+> Stratégie *réseau d'abord* choisie pour que les téléphones récupèrent **toujours la
+> dernière version** du front (fini les soucis de cache pendant les mises à jour), tout en
+> gardant l'ouverture hors-ligne grâce au cache de secours. Le SW ne met **pas** les photos
+> en cache : le slideshow doit refléter l'état réel du serveur.
 
-## 4. Styles
+## 5. Styles
 
 - `styles.css` (capture) et `display.css` (diffusion) : thème néon, animations, responsive.
 - Aucune police/asset externe → fonctionne hors-ligne.
 
-## 5. Points d'attention navigateur
+## 6. Points d'attention navigateur
 
 - **iOS** : `capture` peut proposer photo/vidéo ; l'utilisateur choisit « Photo ».
 - **HTTP local** : le service worker peut ne pas s'activer (contexte non sécurisé) ; la file

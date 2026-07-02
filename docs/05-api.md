@@ -25,30 +25,36 @@ Page de diffusion plein écran (HTML). Destinée à l'écran/vidéoprojecteur.
 ---
 
 ## `POST /api/upload`
-Envoie une photo. Corps `multipart/form-data`.
+Envoie une photo. Le corps de la requête = **les octets bruts de l'image** (PAS de
+`multipart/form-data`). Le prénom passe en **paramètre d'URL**.
 
-**Champs**
+> ⚠️ Choix volontaire : Safari/WebKit produit un `multipart/form-data` que la lib
+> `python-multipart` lit parfois **vide** côté serveur (→ 422 / upload échoué). L'envoi
+> en binaire brut élimine complètement ce problème. Voir [07-frontend](07-frontend.md).
 
-| Champ | Type | Requis | Notes |
-|---|---|---|---|
-| `file` | fichier image | ✅ | jpeg/png/webp/heic ; re-encodé en JPEG |
-| `author` | texte | ❌ | prénom, tronqué à 40 caractères |
+**Paramètres**
+
+| Où | Nom | Type | Requis | Notes |
+|---|---|---|---|---|
+| query | `author` | texte | ❌ | prénom, tronqué à 40 caractères |
+| body | (corps) | octets image | ✅ | jpeg/png/webp/heic ; re-encodé en JPEG |
+| header | `Content-Type` | mime | ❌ | ex. `image/jpeg` (indicatif) |
 
 **Réponses**
 
 | Code | Corps | Cas |
 |---|---|---|
 | 200 | `{ "ok": true, "photo": { id, url, ts, author } }` | succès |
-| 400 | `{ "error": "fichier vide" }` | fichier vide |
-| 400 | `{ "error": "image illisible" }` | image corrompue / format non décodable |
+| 400 | `{ "error": "fichier vide" }` | corps vide |
+| 400 | `{ "error": "image illisible: ..." }` | image corrompue / format non décodable |
 
 **Effets de bord** : écrit `uploads/{ts}-{uuid}.jpg` et diffuse `{type:"new", photo}` sur `/ws`.
 
 **Exemple**
 ```bash
-curl -X POST https://xxxx.trycloudflare.com/api/upload \
-  -F "file=@photo.jpg" \
-  -F "author=Alex"
+curl -X POST "https://xxxx.trycloudflare.com/api/upload?author=Alex" \
+  --data-binary "@photo.jpg" \
+  -H "Content-Type: image/jpeg"
 ```
 
 ---

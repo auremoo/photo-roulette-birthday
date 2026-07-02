@@ -7,7 +7,7 @@
 | Serveur web/API | FastAPI | 0.115 | upload multipart simple, WebSocket natif, async |
 | Serveur ASGI | uvicorn[standard] | 0.34 | serveur perf + support WebSocket |
 | Traitement image | Pillow | 11.1 | resize + correction orientation EXIF |
-| Upload form | python-multipart | 0.0.20 | requis par FastAPI pour `multipart/form-data` |
+| Photos iPhone | pillow-heif | 1.4 | décodage HEIC/HEIF (au cas où iOS n'envoie pas du JPEG) |
 | QR code | qrcode[pil] | 8.0 | génération QR (PNG + ASCII) |
 | Tunnel | cloudflared | latest | URL publique HTTPS gratuite, sans compte |
 | Front | HTML/CSS/JS natif | — | zéro build, zéro CDN, fonctionne hors-ligne |
