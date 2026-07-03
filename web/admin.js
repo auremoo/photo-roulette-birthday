@@ -11,6 +11,8 @@ if (urlPin) pinEl.value = urlPin;
 function pin() { return encodeURIComponent(pinEl.value || ""); }
 function setStatus(msg) { statusEl.textContent = msg || ""; }
 
+const compressEl = document.getElementById("compress");
+
 async function load() {
   setStatus("Chargement…");
   try {
@@ -18,11 +20,28 @@ async function load() {
     if (res.status === 403) { setStatus("❌ Code PIN invalide."); return; }
     const data = await res.json();
     render(data.photos || []);
+    // reflète l'état du réglage compression
+    try {
+      const s = await (await fetch("/api/settings", { cache: "no-store" })).json();
+      compressEl.checked = !!s.compress;
+    } catch (e) {}
     setStatus("");
   } catch (e) {
     setStatus("Erreur de chargement.");
   }
 }
+
+compressEl.addEventListener("change", async () => {
+  try {
+    const res = await fetch(`/api/admin/settings?pin=${pin()}&compress=${compressEl.checked ? 1 : 0}`, { method: "POST" });
+    if (res.status === 403) { setStatus("❌ Code PIN invalide."); compressEl.checked = !compressEl.checked; return; }
+    const d = await res.json();
+    setStatus(d.compress ? "📦 Compression activée (les nouveaux envois seront réduits)." : "Compression désactivée.");
+  } catch (e) {
+    setStatus("Erreur réseau.");
+    compressEl.checked = !compressEl.checked;
+  }
+});
 
 function render(photos) {
   countEl.textContent = `${photos.length} photo(s)`;

@@ -46,12 +46,27 @@ local) ou va sur `http://localhost:8000/admin`.
 > manipulations accidentelles. Pour une vraie sécurité, change le PIN et voir
 > [09 - Sécurité](09-securite-et-vie-privee.md).
 
+## 4bis. Compression des photos côté téléphone (activable depuis l'admin)
+
+Interrupteur **« 📦 Compression photos »** dans l'admin, **désactivé par défaut**.
+Quand il est activé, chaque téléphone **réduit la photo avant l'envoi** (redimensionnée à
+1600 px, JPEG qualité 0,7) → uploads bien plus rapides et fiables en réseau faible (4G, wifi
+saturé). Utile si tu constates des envois lents le jour J.
+
+- Réglage lu par la page de capture via `GET /api/settings` (relu à chaque photo, donc
+  l'activation prend effet immédiatement sur les téléphones déjà ouverts).
+- Modifié via `POST /api/admin/settings?pin=&compress=1|0`.
+- **Sécurité anti-perte** : si le navigateur ne sait pas compresser (ex. HEIC non
+  décodable, vieux Safari), on **envoie l'original** — aucune photo n'est perdue.
+- La compression corrige aussi l'orientation (EXIF appliqué au moment du redimensionnement).
+
 ## 5. Récapitulatif des réglages
 
-| Réglage | Fichier | Défaut |
+| Réglage | Où | Défaut |
 |---|---|---|
 | Code PIN admin | `server/app.py` → `ADMIN_PIN` | `1234` |
 | Objectif du ballon | `server/app.py` → `balloon["goal"]` | 25 |
+| Compression photos | admin (interrupteur) / `settings["compress"]` | **OFF** |
 | Liste des mascottes | `web/display.js` → `MASCOTS` | 15 emojis |
 | Fréquence mascottes | `web/display.js` → `startMascots` | 6–12 s |
 

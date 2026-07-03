@@ -105,6 +105,12 @@ Infos pour l'écran de diffusion : URL publique (pour le QR à l'écran) + objec
 { "public_url": "https://xxxx.trycloudflare.com", "balloon_goal": 25 }
 ```
 
+## `GET /api/settings`
+Réglages lus par la page de capture. Actuellement : compression côté téléphone.
+```json
+{ "compress": false }
+```
+
 ## `POST /api/balloon`
 Un invité gonfle le **ballon collaboratif** (mini-jeu). Incrémente le compteur partagé et
 diffuse l'état via `/ws`. À l'objectif, le ballon « explose » (`balloon_pop`) et repart.
@@ -123,6 +129,7 @@ configurable dans `server/app.py` (`ADMIN_PIN`). Sinon → `403`.
 |---|---|---|
 | `GET` | `/admin` | Page d'administration (HTML) |
 | `GET` | `/api/admin/photos?pin=` | Liste des photos (plus récentes d'abord) |
+| `POST` | `/api/admin/settings?pin=&compress=1\|0` | Active/désactive la compression côté téléphone |
 | `POST` | `/api/admin/delete?pin=&id=` | Supprime une photo (broadcast `deleted`) |
 | `GET` | `/api/admin/export?pin=` | Télécharge un **ZIP** de toutes les photos |
 | `POST` | `/api/admin/reset?pin=` | Supprime toutes les photos (broadcast `reset`) |

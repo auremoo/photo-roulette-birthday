@@ -23,6 +23,8 @@
     .card .del { position: absolute; top: 6px; right: 6px; background: rgba(255,60,60,.92); color: #fff; border: none; border-radius: 999px; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; }
     .empty { padding: 40px 20px; opacity: .7; }
     .count { font-size: .9rem; opacity: .85; }
+    .toggle { display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; background: #0f0b17; padding: 6px 12px; border-radius: 8px; cursor: pointer; user-select: none; }
+    .toggle input { width: 18px; height: 18px; }
   </style>
 </head>
 <body>
@@ -34,6 +36,9 @@
     <button class="btn-load" id="load">Charger</button>
     <button class="btn-export" id="export">⬇️ Export ZIP</button>
     <button class="btn-reset" id="reset">🗑️ Nouvelle soirée</button>
+    <label class="toggle" title="Réduit les photos sur le téléphone avant l'envoi (uploads plus rapides en réseau faible)">
+      <input type="checkbox" id="compress" /> 📦 Compression photos
+    </label>
   </header>
   <div class="hint">PIN par défaut : <b>1234</b> (modifiable dans <code>server/app.py</code> → <code>ADMIN_PIN</code>). Astuce : ajoute <code>?pin=1234</code> à l'URL pour charger direct.</div>
   <div id="status" class="hint"></div>

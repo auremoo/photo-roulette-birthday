@@ -59,6 +59,11 @@ ADMIN_PIN = "1234"
 # quand le compteur atteint GOAL, le ballon explose à l'écran puis repart.
 balloon = {"count": 0, "goal": 25}
 
+# Réglages modifiables en direct depuis l'admin.
+# compress : si True, les téléphones réduisent la photo AVANT l'envoi (uploads plus
+# rapides/fiables en réseau faible). Désactivé par défaut.
+settings = {"compress": False}
+
 app = FastAPI(title="Photo Roulette Birthday")
 
 
@@ -176,6 +181,12 @@ async def info():
     return {"public_url": read_public_url(), "balloon_goal": balloon["goal"]}
 
 
+@app.get("/api/settings")
+async def get_settings():
+    """Réglages lus par la page de capture (ex. compression côté téléphone)."""
+    return {"compress": settings["compress"]}
+
+
 @app.post("/api/balloon")
 async def balloon_tap():
     """Un invité gonfle le ballon collaboratif."""
@@ -215,6 +226,17 @@ async def admin_photos(request: Request):
         return JSONResponse({"error": "pin invalide"}, status_code=403)
     # ordre le plus récent d'abord (pratique pour modérer)
     return {"photos": list(reversed(list_photos_sorted()))}
+
+
+@app.post("/api/admin/settings")
+async def admin_set_settings(request: Request):
+    if not _check_pin(request):
+        return JSONResponse({"error": "pin invalide"}, status_code=403)
+    val = request.query_params.get("compress")
+    if val is not None:
+        settings["compress"] = val.lower() in ("1", "true", "on", "yes")
+    logger.info("ADMIN settings compress=%s", settings["compress"])
+    return {"ok": True, "compress": settings["compress"]}
 
 
 @app.post("/api/admin/delete")

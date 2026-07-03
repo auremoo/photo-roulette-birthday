@@ -64,18 +64,61 @@ async function queueDelete(id) {
 
 // ---------- Prise de photo ----------
 fileInput.addEventListener("change", async () => {
-  const file = fileInput.files[0];
-  if (!file) return;
-  // on met TOUJOURS en file d'attente d'abord => aucune photo perdue
-  await queueAdd({ blob: file, author: authorEl.value || "", ts: Date.now() });
+  const original = fileInput.files[0];
+  if (!original) return;
+  addThumb(URL.createObjectURL(original)); // vignette tout de suite
+  fileInput.value = "";
+
+  // compression optionnelle (activable depuis l'admin) AVANT la mise en file
+  let blob = original;
+  if (await shouldCompress()) {
+    setStatus('<span class="spinner"></span> Optimisation…', "");
+    blob = await compressImage(original);
+  }
+
+  // on met en file d'attente => aucune photo perdue même hors-ligne
+  await queueAdd({ blob, author: authorEl.value || "", ts: Date.now() });
   myCount++;
   localStorage.setItem("myCount", String(myCount));
   renderCount();
-  addThumb(URL.createObjectURL(file));
   confettiBurst();
-  fileInput.value = "";
   drainQueue();
 });
+
+// ---------- Compression côté téléphone (optionnelle, pilotée par l'admin) ----------
+let compressEnabled = false; // dernière valeur connue (repli si hors-ligne)
+
+async function shouldCompress() {
+  try {
+    const res = await fetch("/api/settings", { cache: "no-store" });
+    const d = await res.json();
+    compressEnabled = !!d.compress;
+  } catch (e) {
+    /* pas de réseau : on garde la dernière valeur connue */
+  }
+  return compressEnabled;
+}
+
+async function compressImage(file, maxSide = 1600, quality = 0.7) {
+  try {
+    // imageOrientation:"from-image" -> l'orientation EXIF est appliquée au bitmap
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    let w = bitmap.width, h = bitmap.height;
+    const scale = Math.min(1, maxSide / Math.max(w, h));
+    w = Math.round(w * scale);
+    h = Math.round(h * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+    if (bitmap.close) bitmap.close();
+    const out = await new Promise((r) => canvas.toBlob(r, "image/jpeg", quality));
+    // si la compression échoue ou n'aide pas, on garde l'original (aucune perte)
+    return out && out.size > 0 && out.size < file.size ? out : file;
+  } catch (e) {
+    return file; // ex. HEIC non décodable par le navigateur -> on envoie l'original
+  }
+}
 
 // ---------- Envoi de la file d'attente ----------
 let draining = false;
