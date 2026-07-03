@@ -1,3 +1,4 @@
+# photo-roulette-birthday — Idée de Valentin Dusservaix et Aurélien Moote en support - 2026 — Licence MIT
 """
 Photo Roulette Birthday — serveur FastAPI.
 

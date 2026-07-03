@@ -1,5 +1,8 @@
 # 📸 Photo Roulette Birthday
 
+> Idée de Valentin Dusservaix et Aurélien Moote en support - 2026. Logiciel libre
+> (licence MIT) : réutilisable à condition de conserver la mention des auteurs.
+
 Une petite app web pour une soirée d'anniversaire : les invités **scannent un QR code**,
 prennent des photos avec leur téléphone, et celles-ci s'affichent **en direct et en
 aléatoire** sur un écran (vidéoprojecteur / autre PC). Ton PC sert de serveur.
@@ -172,3 +175,15 @@ photo-roulette-birthday/
   peut envoyer/voir. Ne partage le QR qu'aux invités.
 - Sauvegarde le dossier `uploads/` après la soirée pour garder les souvenirs 💾.
 ```
+
+---
+
+## Auteur & licence
+
+**Idée de Valentin Dusservaix et Aurélien Moote en support - 2026.**
+
+Logiciel libre sous **licence MIT** (voir [LICENSE](LICENSE)) : réutilisable, y compris à
+des fins commerciales, **à condition de conserver la mention des auteurs**.
+Voir aussi [NOTICE](NOTICE) et [AUTHORS](AUTHORS).
+
+Copyright (c) 2026 Valentin Dusservaix et Aurélien Moote.
