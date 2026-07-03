@@ -99,6 +99,51 @@ connexion tombe ; un indicateur (point vert/rouge) reflète l'état.
 
 ---
 
+## `GET /api/info`
+Infos pour l'écran de diffusion : URL publique (pour le QR à l'écran) + objectif du ballon.
+```json
+{ "public_url": "https://xxxx.trycloudflare.com", "balloon_goal": 25 }
+```
+
+## `POST /api/balloon`
+Un invité gonfle le **ballon collaboratif** (mini-jeu). Incrémente le compteur partagé et
+diffuse l'état via `/ws`. À l'objectif, le ballon « explose » (`balloon_pop`) et repart.
+```json
+{ "pop": false, "count": 7, "goal": 25 }
+```
+
+---
+
+## Administration (modération) — protégé par PIN
+
+Toutes ces routes exigent le PIN (`?pin=...` ou en-tête `X-Admin-Pin`). Défaut `1234`,
+configurable dans `server/app.py` (`ADMIN_PIN`). Sinon → `403`.
+
+| Méthode | Route | Description |
+|---|---|---|
+| `GET` | `/admin` | Page d'administration (HTML) |
+| `GET` | `/api/admin/photos?pin=` | Liste des photos (plus récentes d'abord) |
+| `POST` | `/api/admin/delete?pin=&id=` | Supprime une photo (broadcast `deleted`) |
+| `GET` | `/api/admin/export?pin=` | Télécharge un **ZIP** de toutes les photos |
+| `POST` | `/api/admin/reset?pin=` | Supprime toutes les photos (broadcast `reset`) |
+
+> Sécurité : `id` est validé (pas de `/`, `\`, `..`) et résolu strictement dans `uploads/`
+> pour empêcher tout accès hors du dossier (path traversal).
+
+---
+
+## Messages WebSocket (serveur → client)
+
+| `type` | Charge utile | Effet côté écran |
+|---|---|---|
+| `new` | `{photo}` | affiche la nouvelle photo |
+| `deleted` | `{id}` | retire la photo du diaporama |
+| `reset` | — | vide le diaporama |
+| `balloon` | `{count, goal}` | met à jour la taille du ballon |
+| `balloon_pop` | — | fait exploser le ballon + confettis |
+
+---
+
 ## `GET /uploads/{fichier}`
 Sert un fichier photo (image/jpeg). Monté via `StaticFiles`.
 

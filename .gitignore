@@ -15,6 +15,9 @@ uploads/*
 /accueil.jpg
 /accueil.jpeg
 
+# QR généré au lancement (contient l'URL éphémère du tunnel)
+web/qr.png
+
 # OS
 Thumbs.db
 .DS_Store

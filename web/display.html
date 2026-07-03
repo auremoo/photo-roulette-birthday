@@ -20,6 +20,18 @@
     <span id="status-dot" class="dot" title="connexion"></span>
   </div>
 
+  <!-- QR pour rejoindre en scannant l'écran -->
+  <div class="join" id="join">
+    <img id="join-qr" src="/static/qr.png" alt="" onerror="this.style.display='none'" />
+    <div class="join-text">📸 Scanne pour<br>envoyer tes photos !</div>
+  </div>
+
+  <!-- Ballon collaboratif -->
+  <div class="balloon-wrap" id="balloon-wrap">
+    <div class="balloon" id="balloon">🎈</div>
+    <div class="balloon-label" id="balloon-label"></div>
+  </div>
+
   <script src="/static/display.js"></script>
 </body>
 </html>

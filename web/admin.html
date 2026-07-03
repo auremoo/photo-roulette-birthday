@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🔧 Admin — Photo Roulette</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #14101c; color: #fff; }
+    header { padding: 16px 20px; background: #1e1730; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; position: sticky; top: 0; z-index: 5; }
+    h1 { font-size: 1.2rem; margin: 0; }
+    .spacer { flex: 1; }
+    input[type=password], input[type=text] { padding: 8px 12px; border-radius: 8px; border: 1px solid #443; background: #0f0b17; color: #fff; }
+    button { padding: 8px 14px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
+    .btn-load { background: #00e5ff; color: #05000c; }
+    .btn-export { background: #4dff88; color: #05000c; }
+    .btn-reset { background: #ff5b5b; color: #fff; }
+    .hint { opacity: .7; font-size: .85rem; padding: 6px 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 20px; }
+    .card { background: #1e1730; border-radius: 12px; overflow: hidden; position: relative; }
+    .card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+    .card .meta { font-size: .72rem; padding: 6px 8px; opacity: .8; }
+    .card .del { position: absolute; top: 6px; right: 6px; background: rgba(255,60,60,.92); color: #fff; border: none; border-radius: 999px; width: 30px; height: 30px; font-size: 1rem; cursor: pointer; }
+    .empty { padding: 40px 20px; opacity: .7; }
+    .count { font-size: .9rem; opacity: .85; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔧 Admin — Photo Roulette</h1>
+    <span class="count" id="count"></span>
+    <div class="spacer"></div>
+    <input type="password" id="pin" placeholder="Code PIN" />
+    <button class="btn-load" id="load">Charger</button>
+    <button class="btn-export" id="export">⬇️ Export ZIP</button>
+    <button class="btn-reset" id="reset">🗑️ Nouvelle soirée</button>
+  </header>
+  <div class="hint">PIN par défaut : <b>1234</b> (modifiable dans <code>server/app.py</code> → <code>ADMIN_PIN</code>). Astuce : ajoute <code>?pin=1234</code> à l'URL pour charger direct.</div>
+  <div id="status" class="hint"></div>
+  <div class="grid" id="grid"></div>
+
+  <script src="/static/admin.js"></script>
+</body>
+</html>

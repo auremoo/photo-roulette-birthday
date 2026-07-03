@@ -9,6 +9,10 @@ aléatoire** sur un écran (vidéoprojecteur / autre PC). Ton PC sert de serveur
 - 🔌 **Mode secours hors-ligne** : file d'attente sur le téléphone + réenvoi auto au retour du réseau
 - 🎬 Slideshow **aléatoire sans répétition** (une photo ne repasse pas tant que toutes ne sont pas passées)
 - ⚡ Temps réel : une nouvelle photo apparaît instantanément à l'écran
+- 📱 **QR code affiché à l'écran** pour rejoindre en un scan
+- 🦄 **Mascottes** rigolotes qui traversent l'écran
+- 🎈 **Ballon collaboratif** : les invités le gonflent ensemble jusqu'à l'explosion
+- 🔧 **Admin/modération** : supprimer une photo, **export ZIP**, « nouvelle soirée » (voir [docs/13](docs/13-fonctionnalites-fete.md))
 
 ---
 
@@ -119,14 +123,17 @@ photo-roulette-birthday/
 ├── 1 - INSTALLER (une seule fois).bat   # 1 clic : installation
 ├── 2 - LANCER LA SOIREE.bat             # 1 clic : démarre tout (serveur+tunnel+QR+display)
 ├── 3 - ARRETER.bat                      # 1 clic : arrête tout
+├── 4 - ADMIN (photos).bat               # 1 clic : ouvre l'admin (modération, export, reset)
 ├── server/app.py          # backend FastAPI (API + WebSocket + sert le front)
 ├── web/
-│   ├── index.html         # page d'accueil / capture (téléphones)
-│   ├── capture.js         # prise de photo + file d'attente offline + PWA
+│   ├── index.html         # page d'accueil / capture (téléphones) + bouton ballon
+│   ├── capture.js         # prise de photo + file d'attente offline + PWA + ballon
 │   ├── styles.css
-│   ├── display.html       # écran de diffusion (slideshow)
-│   ├── display.js         # tirage aléatoire sans répétition + temps réel
+│   ├── display.html       # écran de diffusion (slideshow) + QR + mascottes + ballon
+│   ├── display.js         # aléatoire sans répétition + temps réel + mascottes + ballon
 │   ├── display.css
+│   ├── admin.html         # page d'administration (modération/export/reset)
+│   ├── admin.js
 │   ├── manifest.json      # PWA
 │   ├── sw.js              # service worker (réseau d'abord, cache secours)
 │   ├── icon.svg

@@ -172,6 +172,30 @@ function confettiBurst() {
   }
 }
 
+// ---------- Mini-jeu ballon collaboratif ----------
+const balloonBtn = document.getElementById("balloonBtn");
+const balloonInfo = document.getElementById("balloonInfo");
+if (balloonBtn) {
+  balloonBtn.addEventListener("click", async () => {
+    balloonBtn.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(1.15)" }, { transform: "scale(1)" }],
+      { duration: 180 }
+    );
+    try {
+      const res = await fetch("/api/balloon", { method: "POST" });
+      const data = await res.json();
+      if (data.pop) {
+        balloonInfo.textContent = "💥 BOUM ! Vous l'avez fait exploser ! 🎉";
+        confettiBurst();
+      } else {
+        balloonInfo.textContent = `🎈 ${data.count}/${data.goal} — continue !`;
+      }
+    } catch (e) {
+      balloonInfo.textContent = "📴 Pas de réseau pour le ballon";
+    }
+  });
+}
+
 // PWA : enregistre le service worker (permet d'ouvrir l'app même hors-ligne)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/static/sw.js").catch(() => {});

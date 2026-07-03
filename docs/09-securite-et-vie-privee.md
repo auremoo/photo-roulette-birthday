@@ -26,6 +26,17 @@ mais voici les risques et comment les limiter.
 
 Voir [12 - Évolutions](12-evolutions.md).
 
+## 2bis. Page d'administration `/admin`
+
+La page `/admin` (supprimer une photo, exporter, réinitialiser) est joignable **aussi via
+l'URL publique du tunnel**. Elle est protégée par un **code PIN** (`ADMIN_PIN` dans
+`server/app.py`, défaut `1234`) transmis à chaque action.
+
+- Le PIN par défaut évite surtout les **manipulations accidentelles**. Pour une vraie
+  protection, **change-le** avant la soirée (mets une valeur non devinable).
+- L'action `reset` supprime **toutes** les photos : pense à **exporter le ZIP avant**.
+- Les suppressions/reset sont définitifs (pas de corbeille).
+
 ## 3. Données personnelles
 
 - **Nature** : photos de personnes + prénoms facultatifs.

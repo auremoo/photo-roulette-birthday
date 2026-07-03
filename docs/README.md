@@ -20,6 +20,7 @@ puis descends vers les détails techniques selon ton besoin.
 | 10 | [Exploitation — Runbook](10-exploitation-runbook.md) | Install, lancement, checklist jour J, dépannage |
 | 11 | [Tests & recette](11-tests-et-recette.md) | Plan de test, scénarios, checklist de validation |
 | 12 | [Évolutions & backlog](12-evolutions.md) | Idées futures, dette assumée |
+| 13 | [Fonctionnalités fête](13-fonctionnalites-fete.md) | QR à l'écran, mascottes, ballon collaboratif, admin/modération/export |
 
 ## Lecture rapide selon ton rôle
 

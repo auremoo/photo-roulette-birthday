@@ -147,6 +147,22 @@ h1 {
   opacity: .85;
 }
 
+.balloon-btn {
+  margin-top: 4px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  padding: 16px 26px;
+  border: none;
+  border-radius: 999px;
+  color: #10001a;
+  background: linear-gradient(135deg, #00e5ff, #8a2be2);
+  box-shadow: 0 0 22px rgba(138, 43, 226, .7);
+  cursor: pointer;
+  transition: transform .1s;
+}
+.balloon-btn:active { transform: scale(.9); }
+.balloon-info { font-size: .95rem; font-weight: 700; min-height: 1.2em; opacity: .95; }
+
 .footer-link {
   margin-top: 6px;
   font-size: .8rem;

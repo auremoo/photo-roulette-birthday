@@ -17,9 +17,18 @@ qr.make(fit=True)
 qr.print_ascii(invert=True)
 
 # fichier PNG à imprimer / afficher en grand
-out = Path(__file__).resolve().parent.parent / "bin" / "qr.png"
+root = Path(__file__).resolve().parent.parent
+out = root / "bin" / "qr.png"
 out.parent.mkdir(exist_ok=True)
-qr.make_image(fill_color="black", back_color="white").save(out)
+img = qr.make_image(fill_color="black", back_color="white")
+img.save(out)
+
+# copie servie par le serveur, pour afficher le QR sur l'écran /display
+web_qr = root / "web" / "qr.png"
+img.save(web_qr)
+
+# URL publique lue par le serveur (endpoint /api/info -> QR + lien à l'écran)
+(root / "bin" / "public_url.txt").write_text(url, encoding="utf-8")
 
 print()
 print(f"URL   : {url}")

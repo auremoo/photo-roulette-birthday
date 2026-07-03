@@ -20,6 +20,7 @@ import json
 import logging
 import time
 import uuid
+import zipfile
 from pathlib import Path
 
 logger = logging.getLogger("uvicorn.error")
@@ -42,12 +43,21 @@ except Exception:
 BASE_DIR = Path(__file__).resolve().parent.parent
 WEB_DIR = BASE_DIR / "web"
 UPLOAD_DIR = BASE_DIR / "uploads"
+BIN_DIR = BASE_DIR / "bin"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 # --- Réglages --------------------------------------------------------------
 MAX_SIDE = 1600          # côté max des photos stockées (px) -> slideshow fluide
 JPEG_QUALITY = 82        # compression JPEG
 ALLOWED = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
+
+# Code d'accès à la page d'administration /admin (modération, export, reset).
+# Change-le si tu veux ; il évite surtout les manipulations accidentelles.
+ADMIN_PIN = "1234"
+
+# Mini-jeu collaboratif du ballon : les invités appuient pour le gonfler ;
+# quand le compteur atteint GOAL, le ballon explose à l'écran puis repart.
+balloon = {"count": 0, "goal": 25}
 
 app = FastAPI(title="Photo Roulette Birthday")
 
@@ -128,7 +138,7 @@ async def upload(request: Request):
         img = img.convert("RGB")
         img.thumbnail((MAX_SIDE, MAX_SIDE))          # réduit si trop grand
     except Exception as e:
-        logger.exception("UPLOAD decode KO: name=%s type=%s err=%s", file.filename, file.content_type, e)
+        logger.exception("UPLOAD decode KO: err=%s", e)
         return JSONResponse({"error": f"image illisible: {e}"}, status_code=400)
 
     ts = int(time.time() * 1000)
@@ -150,6 +160,104 @@ async def photos():
 @app.get("/api/health")
 async def health():
     return {"ok": True, "count": len(list_photos_sorted())}
+
+
+def read_public_url() -> str:
+    """URL publique du tunnel, écrite par make_qr.py au lancement (pour le QR à l'écran)."""
+    try:
+        return (BIN_DIR / "public_url.txt").read_text(encoding="utf-8").strip()
+    except Exception:
+        return ""
+
+
+@app.get("/api/info")
+async def info():
+    """Infos affichées par l'écran de diffusion (URL pour le QR, objectif ballon)."""
+    return {"public_url": read_public_url(), "balloon_goal": balloon["goal"]}
+
+
+@app.post("/api/balloon")
+async def balloon_tap():
+    """Un invité gonfle le ballon collaboratif."""
+    balloon["count"] += 1
+    if balloon["count"] >= balloon["goal"]:
+        balloon["count"] = 0
+        await hub.broadcast({"type": "balloon_pop"})
+        return {"pop": True, "count": 0, "goal": balloon["goal"]}
+    await hub.broadcast({"type": "balloon", "count": balloon["count"], "goal": balloon["goal"]})
+    return {"pop": False, "count": balloon["count"], "goal": balloon["goal"]}
+
+
+# --- Administration (modération / export / reset) --------------------------
+def _check_pin(request: Request) -> bool:
+    given = request.query_params.get("pin") or request.headers.get("x-admin-pin") or ""
+    return given == ADMIN_PIN
+
+
+def _safe_photo_path(pid: str) -> Path | None:
+    """Résout un id de photo en chemin sûr dans uploads/ (anti path-traversal)."""
+    if not pid or "/" in pid or "\\" in pid or ".." in pid:
+        return None
+    p = (UPLOAD_DIR / f"{pid}.jpg").resolve()
+    if p.parent != UPLOAD_DIR.resolve():
+        return None
+    return p
+
+
+@app.get("/admin")
+async def admin_page():
+    return FileResponse(WEB_DIR / "admin.html")
+
+
+@app.get("/api/admin/photos")
+async def admin_photos(request: Request):
+    if not _check_pin(request):
+        return JSONResponse({"error": "pin invalide"}, status_code=403)
+    # ordre le plus récent d'abord (pratique pour modérer)
+    return {"photos": list(reversed(list_photos_sorted()))}
+
+
+@app.post("/api/admin/delete")
+async def admin_delete(request: Request):
+    if not _check_pin(request):
+        return JSONResponse({"error": "pin invalide"}, status_code=403)
+    pid = request.query_params.get("id", "")
+    target = _safe_photo_path(pid)
+    if target is None or not target.exists():
+        return JSONResponse({"error": "introuvable"}, status_code=404)
+    target.unlink()
+    await hub.broadcast({"type": "deleted", "id": pid})
+    logger.info("ADMIN suppression photo %s", pid)
+    return {"ok": True}
+
+
+@app.get("/api/admin/export")
+async def admin_export(request: Request):
+    if not _check_pin(request):
+        return JSONResponse({"error": "pin invalide"}, status_code=403)
+    BIN_DIR.mkdir(exist_ok=True)
+    zip_path = BIN_DIR / "photos-soiree.zip"
+    # JPEG déjà compressés -> ZIP_STORED (rapide, pas de recompression)
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_STORED) as z:
+        for p in sorted(UPLOAD_DIR.glob("*.jpg")):
+            z.write(p, p.name)
+    return FileResponse(zip_path, filename="photos-soiree.zip", media_type="application/zip")
+
+
+@app.post("/api/admin/reset")
+async def admin_reset(request: Request):
+    if not _check_pin(request):
+        return JSONResponse({"error": "pin invalide"}, status_code=403)
+    n = 0
+    for p in UPLOAD_DIR.glob("*.jpg"):
+        try:
+            p.unlink()
+            n += 1
+        except Exception:
+            pass
+    await hub.broadcast({"type": "reset"})
+    logger.info("ADMIN reset galerie (%d photos supprimées)", n)
+    return {"ok": True, "deleted": n}
 
 
 @app.websocket("/ws")

@@ -129,3 +129,60 @@ html, body {
 }
 .dot { width: 12px; height: 12px; border-radius: 50%; background: #ff5b5b; box-shadow: 0 0 10px #ff5b5b; }
 .dot.on { background: #4dff88; box-shadow: 0 0 10px #4dff88; }
+
+/* QR "rejoindre" en bas à gauche */
+.join {
+  position: fixed;
+  left: 20px; bottom: 20px;
+  z-index: 6;
+  background: rgba(255,255,255,.95);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 0 30px rgba(0,0,0,.5);
+}
+.join img { width: 110px; height: 110px; display: block; image-rendering: pixelated; }
+.join-text { color: #10001a; font-weight: 800; font-size: 1rem; line-height: 1.2; max-width: 130px; }
+
+/* Mascottes qui traversent l'écran */
+.mascot {
+  position: fixed;
+  z-index: 4;
+  font-size: clamp(48px, 8vw, 110px);
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.5));
+}
+
+/* Ballon collaboratif */
+.balloon-wrap {
+  position: fixed;
+  right: 26px; bottom: 20px;
+  z-index: 6;
+  display: none;               /* affiché seulement quand le jeu démarre */
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.balloon-wrap.active { display: flex; }
+.balloon {
+  font-size: 60px;             /* grossit via transform en JS */
+  transform-origin: bottom center;
+  transition: transform .25s cubic-bezier(.2,1.6,.4,1);
+  will-change: transform;
+}
+.balloon-label {
+  background: rgba(0,0,0,.5);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: .95rem;
+}
+.balloon.pop { animation: balloonPop .5s ease forwards; }
+@keyframes balloonPop {
+  0% { transform: scale(var(--s, 3)); }
+  40% { transform: scale(calc(var(--s, 3) * 1.25)); }
+  100% { transform: scale(0); opacity: 0; }
+}
